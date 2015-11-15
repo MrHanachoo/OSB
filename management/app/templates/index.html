@@ -1,0 +1,37 @@
+class DownloadContainer():
+    """
+
+    """
+
+    def __init__(self):
+        pass
+
+    def download_container(self, username, passwd, container):
+        user_auth_url = app.config['USER_AUTH_URL']
+        download_all = sub.Popen(
+            ["swift", "download", container, "--os-tenant-name", username, "--os-username", username,
+             "--os-password", passwd, "--os-auth-url", user_auth_url],
+            stdout=sub.PIPE, stderr=sub.PIPE).communicate()
+        if not download_all[1]:
+            return True
+        else:
+            return False
+
+
+class DownloadAll():
+    """
+
+    """
+
+    def __init__(self):
+        pass
+
+    def download_all(self, username, passwd):
+        user_auth_url = app.config['USER_AUTH_URL']
+        download_all = sub.Popen(["swift", "download", "--os-tenant-name", username, "--os-username", username,
+                                  "--os-password", passwd, "--os-auth-url", user_auth_url],
+                                 stdout=sub.PIPE, stderr=sub.PIPE).communicate()
+        if not download_all[1]:
+            return True
+        else:
+            return False

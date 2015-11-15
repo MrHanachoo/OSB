@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="col-md-12">
+    <div class="row">
+
+        <div class=" col-md-2 sidebar">
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>
+                        <center>
+                            Containers List
+                            <!-- Button trigger modal -->
+                            <button type="button" class="glyphicon glyphicon-class glyphicon-plus" aria-hidden="true"
+                                    data-toggle="modal"
+                                    data-target="#myModal" data-placement="top" title="create new container"
+                                    data-toggle="tooltip"
+                                    >
+
+
+                            </button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                                    aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title" id="myModalLabel">Enter Container Name</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input id="new_container_name" type="text" class="form-control">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close
+                                            </button>
+                                            <button type="button" class="btn btn-primary"
+                                                    onclick="check_container_creation_process()">Create
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </center>
+                    </th>
+                </tr>
+                </thead>
+            </table>
+
+            <ul class="nav nav-sidebar " id="containers_list" style="height: 300px; overflow: auto">
+                {% if cont_list %}
+                {% for i in cont_list %}
+                <li class="active">
+                    <a href="/account/{{ cont_list[i] }} ">
+                        <table>
+                            <tbody>
+                            <tr>
+
+                                <td width="70%">
+                                    <div style="color: #333" id='container_name_{{ cont_list[i] }}'>{{ cont_list[i] }}
+                                    </div>
+                                </td>
+                                <div id="show">
+                                    <td width="13%">
+                                        <form action="url_for('/account/{{ cont_list[i] }}/upload')" method=POST enctype=multipart/form-data>
+                                        <input style="color: #333" title="upload" name="object_to_upload"
+                                               class="filestyle" data-input="false" data-buttonText=""
+                                               data-icon="true" data-size="sm" data-iconName="glyphicon-cloud-upload"
+                                               id="upload_obj" type="file" multiple="false"
+                                               onclick="upload_object_process('{{ cont_list[i] }}')">
+                                        </form>
+
+                                    </td>
+                                    <td width="4%"></td>
+                                    <td width="13%">
+                                        <button style="color: #333" title="delete container"
+                                                class="glyphicon glyphicon-trash" data-size="sm"
+                                                onclick="check_container_deletion_process('{{ cont_list[i] }}')"
+                                                data-toggle="modal" data-target="#delete-modal">
+
+                                        </button>
+
+                                    </td>
+                                </div>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </a>
+                </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+
+        </div>
+
+        <div class="col-md-10">
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th style="width: 50%">Name</th>
+                    <th style="width: 10%">Size</th>
+                    <th style="width: 10%">Type</th>
+                    <th style="width: 20%;">Last modified</th>
+
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                </tr>
+                </thead>
+            </table>
+
+            <div class="files-grid-view" style="height:400px;   overflow: auto">
+                <table class="table table-striped">
+
+                    <tbody>
+                    <div id="objects_list">
+                        {% if objs_list %}
+                        {% for i in objs_list %}
+                        <tr class="active">
+
+                            <td style="width: 50%">
+                                <div id="{{ i['name'] }}">{{ i['name'] }}</div>
+                            </td>
+
+                            <td style="width: 10%">
+                                <center>{{ i['bytes'] }} KB</center>
+                            </td>
+
+                            <td style="width: 15%">
+                                <center>{{ i['content_type'] }}</center>
+                            </td>
+                            <td style="width: 20%">
+                                <center>{{ i['last_modified'] }}</center>
+                            </td>
+                            <th style="width: 5%"></th>
+                            <!-- Read Object -->
+                            <!--
+                            <td style="width: 5%">
+                                <button title="view">
+
+                                    <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+                                    <span class="glyphicon-class"></span>
+
+                                </button>
+
+                            </td>
+                            -->
+
+                            <td style="width: 5%">
+                                    <button title="download" onclick="download_object_process('{{ i['name'] }}')">
+                                        <span class="glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
+                                        <span class="glyphicon-class"></span>
+                                    </button>
+                            </td>
+
+                            <td style="width: 5%"><!-- Share Object -->
+                                <button title="share" onclick="share_object_process( '{{ i['name'] }}')">
+                                    <span class="glyphicon glyphicon-link" aria-hidden="false"></span>
+                                    <span class="glyphicon-class"></span>
+                                </button>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="myShare" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close"><span
+                                                        aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myShareLabel">Share a link for..</h4>
+                                            </div>
+                                            <div class="modal-body">
+
+
+                                                <input id="#object_link" type="text" class="form-control">
+
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                    Close
+                                                </button>
+                                                <button type="button" class="btn btn-primary"
+                                                        onclick="share_object_process('{{ i['name'] }}')">Copy
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </td>
+                            <!-- Modal -->
+                            <!-- Download Object -->
+                            <!--
+
+                            <!-- Modal -->
+
+                            <td style="width: 5%"><!-- Delete Object -->
+                                <button title="delete" onclick="check_object_deletion_process('{{ i['name'] }}')">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                    <span class="glyphicon-class"></span>
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

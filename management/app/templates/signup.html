@@ -1,0 +1,75 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-4">
+        <h1> {{ title }}</h1>
+
+        <form action="" method="post" name="login">
+            {{ form.hidden_tag() }}
+            <p>
+
+            <div id="swift_user">
+                <div>
+                    {{ form.user_name.label }}<br>
+                    {{ form.user_name(class="form-control") }}
+                </div>
+                <div>
+                    {% for error in form.user_name.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            </p>
+            <p>
+
+            <div id="swift_pass">
+                <div>
+                    {{ form.user_pass.label }}<br>
+                    {{ form.user_pass(class="form-control") }}
+                </div>
+                <div>
+                    {% for error in form.user_pass.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            </p>
+            <p>
+
+            <div id="swift_pass_confirm">
+                <div>
+                    {{ form.confirm_user_pass.label }}<br>
+                    {{ form.confirm_user_pass(class="form-control") }}
+                </div>
+                <div>
+                    {% for error in form.confirm_user_pass.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            </p>
+            <p>
+
+            <div id="swift_email">
+                <div>
+                    {{ form.user_email.label }}<br>
+                    {{ form.user_email(class="form-control") }}
+                </div>
+                <div>
+                    {% for error in form.user_email.errors %}
+                    <p class="text-danger">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+
+            <div id="swift-submit">
+                {{ form.submit(class="btn btn-default") }}
+            </div>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

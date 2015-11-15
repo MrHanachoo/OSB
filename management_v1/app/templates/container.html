@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="col-md-2" xmlns="http://www.w3.org/1999/html"></div>
+<div class="col-md-8" style="background-color: #ffffff; border-radius: 0.5cm">
+    <div class="row" style="margin-left: 1cm; margin-right: 1cm; margin-bottom: .5cm">
+        <div class="navbar-header">
+            <h3><b style=" color: #C52D2F">Cloud Storage  </b>/  Containers  /  {{ session['container'] }}</h3>
+        </div>
+        <div class="nav navbar-nav navbar-right" style="background-color: #cccccc; margin-top: 0.5cm; border-radius: 0.2cm">
+            <div style="margin: .2cm">
+                {{ container_info['x-container-object-count'] }} objetcs<br>
+                {{ '%0.2f' % container_info['x-container-bytes-used'] }}   GB Used
+            </div>
+        </div>
+        <br><br><br>
+        <!-- Button Upload Object -->
+        <span data-placement="top" data-toggle="tooltip" title="upload a file to the object storage platform">
+            <button  class="btn btn-sm btn-primary" type="button" aria-hidden="true"
+                     data-toggle="modal" data-target="#upload_file">
+                Upload Object
+            </button>
+        </span>
+        <!-- Modal Upload Object -->
+        <div class="modal fade" id="upload_file" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Upload to: '{{ session['container'] }}'
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--
+                        <table class="table table-condensed">
+                            <tr>
+                                <th>Name</th>
+                                <th></th>
+                                <th class="type">Type</th>
+                                <th class="size">Size</th>
+                                <th class="icon"></th>
+                            </tr>
+                            <tr>
+                                <td><script>$('#fileInput').change(function() {$("#file_selected").text($(this).val())});</script></td>
+                                <td><script>$("#file_selected").text(this.files[0].type)</script></td>
+                                <td><script>$("#file_selected").text(this.files[0].size)</script></td>
+                            </tr>
+                        </table>
+                        -->
+                        <input class="hidden" type="file" id="fileInput" >
+                        <script>
+                            $('#fileInput').change(function() {
+                                $("#file_selected").text($(this).val()+' - '+this.files[0].size+' Bytes')
+                                //alert(this.files[0].size+this.files[0].type+this.files[0].path);
+                            });
+                        </script>
+                        <i id="file_selected">No files selected…</i>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="select_file" type="button" class="btn btn-default pull-left"
+                                onclick="document.getElementById('fileInput').click()">Select File</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Cancel</button>
+                        <button type="button" class="btn btn-primary">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <span data-placement="buttom" data-toggle="tooltip" title="backward">
+             <button class="btn btn-sm btn-default glyphicon glyphicon-chevron-left"
+                     onclick="redirect_account()">
+             </button>
+        </span>
+
+        <span data-placement="buttom" data-toggle="tooltip" title="forward" >
+            <button class="btn btn-sm btn-default disabled glyphicon glyphicon-chevron-right">
+            </button>
+        </span>
+
+         <span data-placement="buttom" data-toggle="tooltip" title="refresh">
+            <button class="btn btn-sm btn-default glyphicon glyphicon-refresh"
+                    onclick="load_container()">
+            </button>
+        </span>
+
+
+
+
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width: 35%">Object Name</th>
+                    <th style="width: 10%">Size</th>
+                    <th style="width: 9%">Type</th>
+                    <th style="width: 20%">Last modified</th>
+                    <th style="width: 10%"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div  class="table-responsive" style="height:300px; overflow: auto">
+            <table class="table table-hover table-condensed">
+
+                <tbody >
+                <div id="objects_list">
+                    {% if obj_list %}
+                    {% for i in obj_list %}
+                    <tr>
+
+                        <td  style="width: 40%">
+                            <span data-placement="top" data-toggle="tooltip" title="click to download">
+                                <button type="button" class=" btn-link"
+                                        onclick="download_object_process('{{ session['container'] }}', '{{ i['name'] }}')">
+                                    <div style="color: #222222;">
+                                        <small>{{ i['name'] }}</small>
+                                    </div>
+                                </button>
+                            </span>
+
+
+
+
+                        </td>
+
+                        <td style="width: 10%">
+                            <small>
+                                {% if i['bytes'] %}
+                                {% if i['bytes'] % 1024  %}
+                                {% if (i['bytes'] % (1024*1024)) %}
+                                {{ '%0.2f' % (i['bytes'] / (1024*1024)) }} MB
+                                {% else  %}
+                                {{ i['bytes']/1024 }} KB
+                                {% endif %}
+                                {% else  %}
+                                {{ i['bytes'] }} B
+                                {% endif %}
+                                {% else  %}
+                                --
+                                {% endif %}
+                            </small>
+                        </td>
+
+                        <td style="width: 10%">
+                            <small>
+                                {{ i['content_type'] }}
+                            </small>
+                        </td>
+
+
+                        <td style="width: 20%">
+                            <small>
+                                {{ i['last_modified'] }}
+                            </small>
+                        </td>
+
+
+                        <td style="width: 15%">
+                            {% set name =  i['name']  %}
+                            <span data-placement="top" data-toggle="tooltip" title="view">
+                                <button class="glyphicon glyphicon-eye-open"
+                                        onclick="modify_object_view_modal('{{ session['container'] }}', '{{ i['name'] }}')">
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id=view_confirm_modal tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="view_modal_title"> Show ..</h4>
+                                            </div>
+                                            <div class="modal-body" id="view_modal_body">
+                                                are you sure?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-success" id="view_modal_submit" data-dismiss="modal">Show</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </span>
+
+                            <span data-placement="top" data-toggle="tooltip" title="object config">
+                                <button style="color: #333" class="glyphicon glyphicon-cog"
+                                        onclick="modify_object_config_modal('{{ session['url'] }}' ,'{{ session['container'] }}',  '{{ i['name'] }}', '{{ cont_acl }}', '{{ i['temp_url'] }}')">
+                                </button>
+                            <!-- Modal -->
+                                 <div class="modal fade" id=obj_cg_confirm_modal tabindex="-1" role="dialog">
+                                     <div class="modal-dialog modal-lg" role="document">
+                                         <div class="modal-content">
+
+                                             <div class="modal-header">
+                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                 <h4 class="modal-title" id="obj_cg_modal_title"><strong>Show ..</strong></h4>
+                                             </div>
+
+                                             <div class="modal-body">
+                                                 <strong>'{{ session['container'] }}'</strong> Container Public Access:
+                                                 <strong id="obj_status_cg_modal_body">
+                                                     ...
+                                                 </strong>
+                                             </div>
+                                             <!--
+                                             <div class="panel panel-link">
+                                                     <div class="panel-heading" role="tab" id="headingOne">
+                                                         <h4 class="panel-title">
+                                                             <a class="" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                                 Regular URL:
+                                                             </a>
+                                                         </h4>
+                                                     </div>
+                                                     <div style="" aria-expanded="true" id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                                         <div class="panel-body">
+                                                             <strong id="obj_cg_modal_body">
+                                                                 ...
+                                                             </strong>
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                             -->
+
+                                             <div class="modal-body" >
+                                                 Regular URL:<br>
+                                                 <strong id="obj_cg_modal_body" class="modal-content">
+                                                     ...
+                                                 </strong>
+                                             </div>
+
+                                             <div class="modal-body"></div>
+
+                                             <div style="padding-left: 0.5cm" class="modal-body" id="obj_cg_modal_body1">
+                                                 <input id="tempurl" type="checkbox" name="publish" IsChecked="False" onClick="EnableSubmit(this)"> Generate temporary URL
+                                                 <span style="padding-left: 4cm" data-toggle="tooltip" title="max 72 hours"><input   id="ttl" disabled="disabled" style="width: 2cm" type="number" min="1" max="72" step="1" value="1" maxlength="2" required = "required" onchange="EnableSubmit1(this.value)">TTL(hours)</span><br>
+                                                 <small style="padding-left: .5cm">NB: If the corresponding container have active public access, there is no need to generate a temporary url to access the object<br>It is already accessible via its regular url ! </small>
+                                             </div>
+
+                                             <div class="modal-body">
+                                                 Temporary URL:<small> (expires on {{ i['temp_url_exp'] }})</small><br>
+                                                 <strong id="tempurl_read" class="modal-content">
+                                                     ...
+                                                 </strong>
+                                             </div>
+
+                                             <div class="modal-footer">
+                                                 <button type="button" class="btn btn-primary"  data-dismiss="modal">Cancel</button>
+                                                 <button type="button" class="btn btn-success" disabled="disabled" data-dismiss="modal" id="obj_cg_modal_submit">Submit</button>
+                                             </div>
+
+                                         </div>
+                                     </div>
+                                 </div>
+                            </span>
+
+                            </button>
+                            <span data-placement="top" data-toggle="tooltip" title="delete object">
+                                <button style="color: #333" title="delete container"
+                                        class=" glyphicon glyphicon-trash"
+                                        onclick="modify_object_delete_modal('{{ session['container'] }}', '{{ i['name'] }}')">
+                                </button>
+                                <!-- Modal -->
+                                 <div class="modal fade" id=delete_confirm_modal tabindex="-1" role="dialog">
+                                     <div class="modal-dialog" role="document">
+                                         <div class="modal-content">
+                                             <div class="modal-header">
+                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                 <h4 class="modal-title" id="delete_modal_title"> Show ..</h4>
+                                             </div>
+                                             <div class="modal-body" id="delete_modal_body">
+                                                 are you sure?
+                                             </div>
+                                             <div class="modal-footer">
+                                                 <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                                 <button type="button" class="btn btn-danger" id="delete_modal_submit" data-dismiss="modal">Delete Object</button>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                            </span>
+
+                        </td>
+
+
+
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+<div class="col-md-2"></div>
+{% endblock %}

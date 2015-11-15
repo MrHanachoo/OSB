@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="col-md-2" style="background-color: #333"></div>
+<div class="col-md-8" style="background-color: #ffffff; border-radius: 0.5cm" >
+    <div class="row" style="margin-left: 1cm; margin-right: 1cm; margin-bottom: .5cm">
+        <div class="navbar-header" >
+            <h3 ><b style=" color: #C52D2F">Cloud Storage  </b>/  Containers  /  </h3>
+        </div>
+        <div class="nav navbar-nav navbar-right" style="background-color: #cccccc; margin-top: 0.5cm; border-radius: 0.2cm">
+            <div style="margin: .2cm">
+                {{ account_info['x-account-container-count'] }} containers -
+                {{ account_info['x-account-object-count'] }} objetcs<br>
+                {{ '%0.2f' % account_info['x-account-bytes-used'] }}   GB Used
+
+            </div>
+        </div>
+        <br><br><br>
+        <!-- Button Create Container -->
+        <span data-placement="right" data-toggle="tooltip" title="create new container">
+        <button  class="btn btn-sm btn-primary" type="button"
+                 data-toggle="modal"
+                 data-target="#myModal"
+                >
+            Create Container
+        </button>
+        </span>
+        <!-- Modal Create Container -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Enter Container Name</h4>
+                    </div>
+                    <div class="modal-body">
+                        <input id="new_container_name" type="text" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel
+                        </button>
+
+                        <button type="button" class="btn btn-success" data-dismiss="modal"
+                                onclick="check_container_creation_process()">Create Container
+                        </button>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <span data-placement="buttom" data-toggle="tooltip" title="backward">
+            <button class="btn btn-sm btn-default disabled glyphicon glyphicon-chevron-left" >
+            </button>
+        </span>
+
+
+
+        <span data-placement="buttom" data-toggle="tooltip" title="forward">
+            <button class="btn btn-sm btn-default glyphicon glyphicon-chevron-right"
+                    onclick="redirect_container('{{ session['container'] }}')">
+            </button>
+        </span>
+
+        <span data-placement="buttom" data-toggle="tooltip" title="refresh">
+            <button class="btn btn-sm btn-default glyphicon glyphicon-refresh"
+                    onclick="load_container()">
+            </button>
+        </span>
+
+
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width: 55%">Container Name</th>
+                    <th style="width: 10%">Size</th>
+                    <th style="width: 20%">Files</th>
+                    <th style="width: 20%"></th>
+
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="table-responsive" style="height:300px; overflow: auto" >
+            <table class="table table-hover table-condensed">
+
+                <tbody>
+                <div id="containers_list" >
+                    {% if cont_list %}
+                    {% for i in cont_list %}
+                    <tr>
+
+                        <td style="width: 50%">
+                            <span data-placement="buttom" data-toggle="tooltip" title="show content">
+                            <a href="/account/{{ i['name'] }}"  style="color: #222222;"><small>{{ i['name'] }}</small></a>
+                                </span>
+
+                        </td>
+
+                        <td style="width: 10%; margin: auto">
+                            <small>
+                                {% if i['bytes'] %}
+                                {% if i['bytes'] % 1024  %}
+                                {% if (i['bytes'] % (1024*1024)) %}
+                                {{ '%0.2f' % (i['bytes'] / (1024*1024)) }} MB
+                                {% else  %}
+                                {{ i['bytes']/1024 }} KB
+                                {% endif %}
+                                {% else  %}
+                                {{ i['bytes'] }} B
+                                {% endif %}
+                                {% else  %}
+                                -
+                                {% endif %}
+                            </small>
+
+                        </td>
+
+                        <td style="width: 20%">
+                            <small>
+                                {% if i['count'] %}
+                                {% if i['count'] == 1 %}
+                                {{ i['count'] }} object
+                                {% else  %}
+                                {{ i['count'] }} objects
+                                {% endif %}
+                                {% else  %}
+                                -
+                                {% endif %}
+                            </small>
+                        </td>
+
+
+                        <td style="width: 10%" >
+                            <span data-placement="top" data-toggle="tooltip" title="container config">
+                                <button style="color: #333" class="glyphicon glyphicon-cog"
+                                        onclick="modify_container_config_modal('{{ session['url'] }}' , '{{ i['name'] }}', '{{ acl_dic[i.name] }}')">
+                                </button>
+                            <!-- Modal -->
+                                 <div class="modal fade" id=cg_confirm_modal tabindex="-1" role="dialog">
+                                     <div class="modal-dialog" role="document">
+                                         <div class="modal-content">
+                                             <div class="modal-header">
+                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                 <h4 class="modal-title" id="cg_modal_title"><strong>Show ..</strong></h4>
+                                             </div>
+                                             <div class="modal-body" >
+                                                    Public Access:
+                                                 <strong id="status_cg_modal_body">
+                                                     ...
+                                                 </strong>
+                                             </div>
+                                             <div class="modal-body" >
+                                                 URL:
+                                                 <strong id="cg_modal_body">
+                                                     ...
+                                                 </strong>
+                                             </div>
+                                             <div class="modal-body">
+                                                 <form action="">
+                                                     <input id="publish" type="checkbox" name="publish" > Publish to the public internet<br>
+                                                     <small style="padding-left: 1cm; ">publishing the container will make its objects accessible via the given URL</small>
+                                                 </form>
+                                             </div>
+                                             <div class="modal-footer">
+                                                 <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                                 <button type="button" class="btn btn-success" id="cg_modal_submit" data-dismiss="modal" onclick="">Submit</button>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                            </span>
+
+                            <span data-placement="top" data-toggle="tooltip" title="delete container">
+                                <button style="color: #333" class=" glyphicon glyphicon-trash"
+                                        onclick="modify_container_delete_modal('{{ i['name'] }}')">
+                                </button>
+                                <!-- Modal -->
+                                 <div class="modal fade" id=del_confirm_modal tabindex="-1" role="dialog">
+                                     <div class="modal-dialog" role="document">
+                                         <div class="modal-content">
+                                             <div class="modal-header">
+                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                 <h4 class="modal-title" id="del_modal_title"> Show ..</h4>
+                                             </div>
+                                             <div class="modal-body" id="del_modal_body">
+                                                 are you sure?
+                                             </div>
+
+
+                                             <div class="modal-footer">
+                                                 <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                                 <button type="button" class="btn btn-danger" id="del_modal_submit" data-dismiss="modal">Delete Container</button>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                            </span>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-2"></div>
+{% endblock %}

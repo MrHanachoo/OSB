@@ -1,0 +1,49 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-md-2"></div>
+<div class="col-md-8" >
+     <div style="background-color: #eee; border-radius: 0.5cm">
+    <br>
+    <div class="text-center"><h2> Contact us!</h2></div><br>
+         <div class="row contact-wrap">
+                <div class="status alert alert-success" style="display: none"></div>
+                <form id="main-contact-form" class="contact-form" name="contact-form" method="post" action="sendemail.php">
+                    <div class="col-sm-5 col-sm-offset-1">
+                        <div class="form-group">
+                            <label>Name *</label>
+                            <input type="text" name="name" class="form-control" required="required">
+                        </div>
+                        <div class="form-group">
+                            <label>Buisness E-email *</label>
+                            <input type="email" name="email" class="form-control" required="required">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="number" class="form-control" name="number">
+                        </div>
+                        <div class="form-group">
+                            <label>Organisation Name</label>
+                            <input type="text" class="form-control" name="company">
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="form-group">
+                            <label>Subject *</label>
+                            <input type="text" name="subject" class="form-control" required="required">
+                        </div>
+                        <div class="form-group">
+                            <label>Message *</label>
+                            <textarea name="message" id="message" required="required" class="form-control" rows="8" style=" resize:none"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" name="submit" class="btn btn-primary btn-lg" required="required">Submit Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+</div>
+{% endblock %}

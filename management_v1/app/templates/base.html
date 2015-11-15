@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head lang="en">
+    <meta charset="utf-8">
+    {% if title %}
+    <title>{{ title }} | Rosafi-CSP</title>
+    {% else %}
+    <title>Welcome to Rosafi-CSP</title>
+    {% endif %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_upload.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/my_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/my_upload.js') }}"></script>
+</head>
+<body style="background-color: #333">
+<header>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="menuitem">
+        <div class="container">
+            <div class="navbar-header">
+                {% if 'user_name' in session and 'url' in session %}
+                <a  class="navbar-brand" data-toggle="tooltip" data-placement="bottom" title="account"
+                   href="{{ url_for('account') }}" style="color: seashell">
+                    <img src="{{ url_for('static', filename='images/rosafi_logo.png') }}" /></a>
+                {% else %}
+                    <a  class="navbar-brand" data-toggle="tooltip" data-placement="bottom" title="home"
+                   href="{{ url_for('home') }}" style="color: seashell">
+                    <img src="{{ url_for('static', filename='images/rosafi_logo.png') }}" /></a>
+                {% endif %}
+
+            </div>
+
+            <div id="navbar" class="collapse navbar-collapse">
+                {% if 'user_name' in session and 'url' in session %}
+
+
+
+                <ul class="nav navbar-nav navbar-left">
+
+                    <li><a href="{{ url_for('account') }}" data-toggle="tooltip" data-placement="bottom" title="profile">
+                        Welcome, <ins>{{ session['user_name'] }} !</ins></a></li>
+                    <li style="margin-top: 0.2cm; ">
+                        <input style="background-color: #444444" type="text" class="form-control" placeholder="Search for..."
+                                name="search" onkeypress="searchFunc(event, this.value)"
+                                >
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                    <li><a href="{{ url_for('logout') }}">Sign out</a></li>
+                </ul>
+                {% else %}
+                <ul class="nav navbar-nav navbar-left">
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ url_for('login') }}">Sign in</a></li>
+                <!--    <li><a href="{{ url_for('contact') }}">Contact</a></li>     -->
+                     <li><a href="{{ '/signup' }}">SIGN UP!</a></li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+<div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</div>
+<!--<div class="container-fluid jumbotron" > -->
+<div style="background-color: #333">
+    <br><br><br><br><br><br>
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>
